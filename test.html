@@ -1,0 +1,1343 @@
+<script>
+
+    $(document).ready(function () {
+        $('body').on('click','#BulkSingleAssignDeleteBtn',function (){
+            $('#BulkSingleAssignDeleteAlertBlock').slideUp();
+            $('#BulkSingleAssignDeleteForm').slideDown();
+        });
+        // $('body').on('change','#user_filter',function (e){
+        //     $('#user_filter_form').submit();
+        // });
+        // $('body').on('change','#team_filter',function (e){
+        //     $('#team_filter_form').submit();
+        // });
+        // $('body').on('change','#group_filter',function (e){
+        //     $('#group_filter_form').submit();
+        // });
+    });
+
+    function countTotalInput(){
+            var inputValue = 0;
+            $('.number-spinner__input__individually').each(function(){
+                inputValue += +$(this).val();
+            });
+            return inputValue;
+        }
+    function countTotalInputTeam(){
+            var inputValue = 0;
+            $('.number-spinner__input__team').each(function(){
+                inputValue += +$(this).val();
+            });
+            return inputValue;
+        }
+
+
+    // $("#lp").keyup(function(e){
+    //     e.preventDefault();
+    //     let search = $("#lp").val();
+    //     let status = 'All';
+    //     $.ajaxSetup({
+    //         headers: {
+    //             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    //         }
+    //     });
+    //     $.ajax({
+    //         url :  "https://soclosedhaka.soclose.co/admin/lead/search/All",
+    //         type : "POST",
+    //         data : {
+    //             search : search
+    //         },
+    //         success : function(data){
+    //             $('.load_more_btn').addClass('d-none');
+    //             $("#lead_render").html(data.lead_data);
+    //             $(".select2").select2();
+    //         }
+    //     });
+    // });
+
+
+
+
+
+    var all_lead_id_array = [];
+    var all_not_selected_lead_id_array = [];
+    var waiting_lead_in_array = [];
+    var process_lead_in_array = [];
+    var convert_lead_in_array = [];
+    var denied_lead_in_array = [];
+    var recalled_lead_in_array = [];
+    var pre_validate_lead_in_array = [];
+
+    $('body').on('click', '.all_lead_checked', function(){
+        var id = $(this).attr('data-id');
+        $('.all_lead_checked').each(function(){
+                if($(this).is(':checked')){
+                $('#all_lead_custom_check').prop('checked', true)
+                } else{
+                    $('#all_lead_custom_check').prop('checked', false)
+                    return false;
+                }
+        });
+
+        all_not_selected_lead_id_array = [];
+        $('.all_lead_checked').each(function(){
+            if(!$(this).is(':checked')){
+                all_not_selected_lead_id_array.push($(this).attr('data-id'))
+            }
+        });
+        $('.not_selected_lead_id').val(all_not_selected_lead_id_array);
+
+        if(all_lead_id_array.indexOf(id)  != -1){
+
+            all_lead_id_array = all_lead_id_array.filter(item => item !== id)
+        }
+        else{
+            all_lead_id_array.push(id)
+        }
+
+        $('.user_bulk_lead').val(all_lead_id_array);
+        $('.team_bulk_lead').val(all_lead_id_array);
+        $('.group_bulk_lead').val(all_lead_id_array);
+        $('.bulk_delete_lead_id').val(all_lead_id_array);
+        $('#selected_lead_id').val(all_lead_id_array);
+        $('#selected_lead_id_team').val(all_lead_id_array);
+        $('#selectedLead').text(all_lead_id_array.length);
+        $('#selectedLeadTeam').text(all_lead_id_array.length);
+        $('#remainingLead').text(all_lead_id_array.length);
+        $('#remainingLeadTeam').text(all_lead_id_array.length);
+        if($('.check_all_bulk').val() == 1){
+            $('#bulkSelectCount').text(+$('#allLeadCount').val() - all_not_selected_lead_id_array.length);
+            $('#totalSelectedLeadCount').text(+$('#allLeadCount').val() - all_not_selected_lead_id_array.length);
+        }else{
+            $('#bulkSelectCount').text(all_lead_id_array.length);
+        }
+
+        if(all_lead_id_array.length == 0)
+        {
+            $("#bulk_action_section").addClass('d-none');
+            $("#bulkActionsList").hide();
+        }else{
+            $("#bulk_action_section").removeClass('d-none');
+            $("#bulkActionsList").show();
+        }
+    });
+
+    $('body').on('click', '#all_lead_custom_check', function(){
+        all_lead_id_array = [];
+        all_not_selected_lead_id_array = [];
+        $('.not_selected_lead_id').val(all_not_selected_lead_id_array);
+        if(this.checked)
+        {
+            $('.all_lead_checked').each(function(){
+                $(this).prop('checked', true)
+                all_lead_id_array.push($(this).attr('data-id'))
+            });
+        } else{
+            $('.all_lead_checked').each(function(){
+                $(this).prop('checked', false)
+            });
+            $('.check_all_bulk').val(0);
+        }
+        $('.user_bulk_lead').val(all_lead_id_array);
+        $('.team_bulk_lead').val(all_lead_id_array);
+        $('.group_bulk_lead').val(all_lead_id_array);
+        $('.bulk_delete_lead_id').val(all_lead_id_array);
+        $('#selected_lead_id').val(all_lead_id_array);
+        $('#selected_lead_id_team').val(all_lead_id_array);
+        $('#selectedLead').text(all_lead_id_array.length);
+        $('#selectedLeadTeam').text(all_lead_id_array.length);
+        $('#remainingLead').text(all_lead_id_array.length);
+        $('#remainingLeadTeam').text(all_lead_id_array.length);
+        if($('.check_all_bulk').val() == 1){
+            $('#bulkSelectCount').text($('#allLeadCount').val());
+            $('#totalSelectedLeadCount').text($('#allLeadCount').val());
+        }else{
+            $('#bulkSelectCount').text(all_lead_id_array.length);
+        }
+
+        if(all_lead_id_array.length == 0)
+        {
+            // $(".dl-btn").addClass('d-none');
+            // $("#bulk").addClass('d-none');
+            // $("#bulkdlt").addClass('d-none');
+            // $("#group_btn").addClass('d-none');
+            $("#bulk_action_section").addClass('d-none');
+            $("#bulkActionsList").hide();
+            $('#preSelect').addClass('d-none');
+            $('#postSelect').addClass('d-none');
+        }else{
+            // $(".dl-btn").removeClass('d-none');
+            // $("#bulk").removeClass('d-none');
+            // $("#bulkdlt").removeClass('d-none');
+            // $("#group_btn").removeClass('d-none');
+            $("#bulk_action_section").removeClass('d-none');
+            $("#bulkActionsList").show();
+            if($('#thisPageLeadCount').val() == $('#allLeadCount').val()){
+                $('#postSelect').removeClass('d-none');
+            }else{
+                if($('#postSelect').hasClass('d-none')){
+                    $('#preSelect').removeClass('d-none');
+                }
+            }
+        }
+    });
+
+    $('body').on('click', '#bulkActionsListRemove', function(){
+        all_not_selected_lead_id_array = [];
+        $('#all_lead_custom_check').prop('checked', false);
+        $('.all_lead_checked').each(function(){
+            $(this).prop('checked', false)
+            $('.user_bulk_lead').val(all_lead_id_array);
+            $('.team_bulk_lead').val(all_lead_id_array);
+            $('.group_bulk_lead').val(all_lead_id_array);
+            $('.bulk_delete_lead_id').val(all_lead_id_array);
+            $('#selected_lead_id').val(all_lead_id_array);
+            $('#selected_lead_id_team').val(all_lead_id_array);
+            $('#selectedLead').text(all_lead_id_array.length);
+            $('#selectedLeadTeam').text(all_lead_id_array.length);
+            $('#remainingLead').text(all_lead_id_array.length);
+            $('#remainingLeadTeam').text(all_lead_id_array.length);
+            $('#bulkSelectCount').text(all_lead_id_array.length);
+            $('.check_all_bulk').val(0);
+            $("#bulk_action_section").addClass('d-none');
+            $("#bulkActionsList").hide();
+            $('#preSelect').addClass('d-none');
+            $('#postSelect').addClass('d-none');
+        });
+    });
+
+    $(document).on('click', '#bulk_assign_modal', function(){
+
+        if(all_lead_id_array.length == 1){
+            $('#assignee_all'+all_lead_id_array[0]).modal('show');
+        }else{
+            $('#assignee').modal('show');
+        }
+    });
+
+    $(document).on("click", ".number-spinner__btn--increase", function(e){
+        let user = $(this).attr('data-id');
+        if($('.check_all_bulk').val() == 1){
+            if(countTotalInput() == $('#allLeadCount').val()){
+                toastr.error("Maximum limit reached");
+            }else{
+                $(".number-spinner__input__value"+user).val(+$(".number-spinner__input__value"+user).val()+1);
+            }
+            $('#remainingLead').text(+($('#allLeadCount').val()) - countTotalInput());
+        }else{
+            if(countTotalInput() == all_lead_id_array.length){
+                toastr.error("Maximum limit reached");
+            }else{
+                $(".number-spinner__input__value"+user).val(+$(".number-spinner__input__value"+user).val()+1);
+            }
+            $('#remainingLead').text(all_lead_id_array.length - countTotalInput());
+        }
+    });
+    $(document).on("click", ".number-spinner__btn--increase__team", function(e){
+        let team = $(this).attr('data-id');
+        if($('.check_all_bulk').val() == 1){
+            if(countTotalInputTeam() == $('#allLeadCount').val()){
+                toastr.error("Maximum limit reached");
+            }else{
+                $(".number-spinner__input__value__team"+team).val(+$(".number-spinner__input__value__team"+team).val()+1);
+            }
+            $('#remainingLeadTeam').text(+($('#allLeadCount').val()) - countTotalInputTeam());
+        }else{
+            if(countTotalInputTeam() == all_lead_id_array.length){
+                toastr.error("Maximum limit reached");
+            }else{
+                $(".number-spinner__input__value__team"+team).val(+$(".number-spinner__input__value__team"+team).val()+1);
+            }
+            $('#remainingLeadTeam').text(all_lead_id_array.length - countTotalInputTeam());
+        }
+    });
+
+    $(document).on("click", ".number-spinner__btn--decrease", function(e){
+        let user = $(this).attr('data-id');
+        let value = $(".number-spinner__input__value"+user);
+
+        if(value.val() < 1){
+            toastr.error("Minimum limit reached");
+            value.val(0);
+        }else{
+            value.val(+value.val()-1);
+        }
+        if($('.check_all_bulk').val() == 1){
+            $('#remainingLead').text(+($('#allLeadCount').val()) - countTotalInput());
+        }else{
+            $('#remainingLead').text(all_lead_id_array.length - countTotalInput());
+        }
+    });
+    $(document).on("click", ".number-spinner__btn--decrease__team", function(e){
+        let team = $(this).attr('data-id');
+        let value = $(".number-spinner__input__value__team"+team);
+
+        if(value.val() < 1){
+            toastr.error("Minimum limit reached");
+            value.val(0);
+        }else{
+            value.val(+value.val()-1);
+        }
+        if($('.check_all_bulk').val() == 1){
+            $('#remainingLeadTeam').text(+($('#allLeadCount').val()) - countTotalInputTeam());
+        }else{
+            $('#remainingLeadTeam').text(all_lead_id_array.length - countTotalInputTeam());
+        }
+    });
+
+
+
+</script>
+
+<script>
+    $(document).ready(function(e){
+        function select2Fix(){
+            $(".select2").select2({
+                width: '100%',
+            });
+            $("select.select2").css('width','100%');
+        }
+
+        $('#customLeadCreateBtn').click(function(){
+            $('#modals-slide-in').modal('hide');
+            $('#customLeadModalCenter').modal('show');
+        });
+
+        $(".costom_lead_field_delete").click(function(){
+            var data = $(this).attr('data-id');
+            $('#custom_lead_header_delete_field').val(data);
+            $('#custom_lead_header_delete_form').submit();
+        });
+
+        $(".editable-input-toggler").on("click", function(){
+            $(".editable-input").prop("disabled", false);
+            $(".editable-values").removeClass("d-none");
+            $(".current-values").addClass("d-none");
+            $(this).addClass("d-none");
+            $(".editable-input-update-btn").removeClass("d-none");
+        });
+
+        $('body').on('click', '.editable-input-update-btn', function(){
+            var id = $(this).attr('data-id');
+            $('#update_lead_with_modal-'+id).submit();
+        });
+
+        $('body').on('click', '.leadDetailEditBtn', function(){
+            var lead = $(this).attr('data-id');
+            $('#leadDetailEditBtn'+lead).addClass('d-none');
+            $('#leadDetailBtn'+lead).removeClass('d-none');
+            $('#leadDetailEditForm'+lead).removeClass('d-none');
+            $('#leadDetailInfo'+lead).addClass('d-none');
+        });
+
+        $('body').on('click', '.leadDetailBtn', function(){
+            var lead = $(this).attr('data-id');
+            $('#leadDetailEditBtn'+lead).removeClass('d-none');
+            $('#leadDetailBtn'+lead).addClass('d-none');
+            $('#leadDetailEditForm'+lead).addClass('d-none');
+            $('#leadDetailInfo'+lead).removeClass('d-none');
+        });
+
+        $('body').on('click', '.leadDetailEditBtn_all', function(){
+            var lead = $(this).attr('data-id');
+            $('#leadDetailEditBtn_all'+lead).addClass('d-none');
+            $('#leadDetailBtn_all'+lead).removeClass('d-none');
+            $('#leadDetailEditForm_all'+lead).removeClass('d-none');
+            $('#leadDetailInfo_all'+lead).addClass('d-none');
+        });
+
+        $('body').on('click', '.leadDetailBtn_all', function(){
+            var lead = $(this).attr('data-id');
+            $('#leadDetailEditBtn_all'+lead).removeClass('d-none');
+            $('#leadDetailBtn_all'+lead).addClass('d-none');
+            $('#leadDetailEditForm_all'+lead).addClass('d-none');
+            $('#leadDetailInfo_all'+lead).removeClass('d-none');
+        });
+
+        $('body').on('click', '.lead_important', function(){
+            var id= $(this).attr('data-id');
+
+            if($(this).hasClass('btn-outline-warning')){
+                $(this).removeClass('btn-outline-warning');
+                $(this).addClass('btn-outline-secondary');
+            }else{
+                $(this).addClass('btn-outline-warning');
+                $(this).removeClass('btn-outline-secondary');
+            }
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            $.ajax({
+                type: "post",
+                url: "https://soclosedhaka.soclose.co/lead_important",
+                data: {
+                id :id,
+                },
+                success: function (response) {
+                console.log(response);
+                // $('#render').html(response.data);
+                },
+            });
+        });
+
+        $('.lead_tab_btn').click(function(){
+            $('#lead_tab_status').val($(this).attr('data-status'));
+        });
+
+        $('body').on('change','#importLead',function(){
+            var form_data = new FormData($('#importLeadForm')[0]);
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            $.ajax({
+                url: "https://soclosedhaka.soclose.co/lead-pre-import",
+                type: "post",
+                data: form_data,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    if(response.data){
+                        $('#importSubmitButton').removeClass('d-none');
+                        $('#importError').addClass('d-none');
+                        $('#leadCsvHeader').html(response.data);
+                    }
+                    if(response.error){
+                        $('#importSubmitButton').addClass('d-none');
+                        $('#importError').removeClass('d-none');
+                        $('#importError').text(response.error);
+                    }
+                },
+            });
+        });
+        $('body').on('blur', '.leadCommentUpdate', function(){
+            let id = $(this).attr('data-id');
+            let value = $(this).val();
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+
+            $.ajax({
+
+                type: "post",
+                url: "https://soclosedhaka.soclose.co/lead/comment/update",
+                data: {
+                    id :id,
+                    value:value,
+                },
+                success: function (data) {
+                    if(data == 'success'){
+                        toastr.success("Comment Updated");
+                    }
+                }
+            });
+
+        });
+
+        $('body').on('click', '#selectAllButton', function(){
+            $('.check_all_bulk').val(1);
+            $("#preSelect").addClass('d-none');
+            $('#bulkSelectCount').text('25');
+            $('#selectedLead').text('25');
+            $('#selectedLeadTeam').text('25');
+            $('#remainingLead').text('25');
+            $('#remainingLeadTeam').text('25');
+            $("#postSelect").removeClass('d-none');
+        });
+
+        $('body').on('click', '#clearSelection', function(){
+            $('.check_all').click();
+            $('.check_all_bulk').val(0);
+        });
+
+
+        $('.group_edit').click(function (e) {
+            let id = $(this).attr('data-id');
+            $('#GroupModal').modal('hide')
+            $('#group_modal' + id).modal('show')
+        });
+
+        /* Distribute Search Function */
+        $(document).on("input", ".distribute-search__input", function() {
+            let searchValue = $(this).val().toLowerCase();
+            $(".distribute-list .distribute-list__item__individually").filter(function() {
+                $(this).toggle($(this).find(".distribute-list__item__info__title__individually").text().toLowerCase().indexOf(searchValue) > -1)
+            });
+        });
+        $(document).on("input", ".distribute-search__input__team", function() {
+            let searchValue = $(this).val().toLowerCase();
+            $(".distribute-list .distribute-list__item__team").filter(function() {
+                $(this).toggle($(this).find(".distribute-list__item__info__title__team").text().toLowerCase().indexOf(searchValue) > -1)
+            });
+        });
+
+        $('#page_form_submit').submit(function (e) {
+            e.preventDefault();
+
+            let page_number = +$('#page_number').val();
+            let min = +$('#page_number').attr('data-min');
+            let max = +$('#page_number').attr('data-max');
+            let current = +$('#page_number').attr('data-curentPage');
+            var url = 'https://soclosedhaka.soclose.co/admin/lead/index?page=101010101';
+            url = url.replace('101010101', page_number)
+
+            if (page_number < min) {
+                toastr.error("Cette page n'existe pas");
+            }
+            else if(page_number > max){
+                toastr.error("Cette page n'existe pas");
+            }
+            else if(page_number == current){
+                toastr.error("Vous êtes déjà sur cette page");
+            }
+            else{
+                window.location =  url.replaceAll('amp;', '');
+            }
+
+        });
+
+    });
+</script>
+
+<script src="https://soclosedhaka.soclose.co/backend/vendor/daterangepicker/js/moment.min.js"></script>
+<script src="https://soclosedhaka.soclose.co/backend/vendor/daterangepicker/js/daterangepicker.min.js"></script>
+<script>
+
+$('[data-daterangepicker-type="date"]').each(function(){
+    if($(this).attr('data-daterangepicker-autoUpdateInput') === 'true'){
+        $(this).daterangepicker({
+            "parentEl": ($(this).closest('.full-screen-parent').length ? ".full-screen-parent" : "body"),
+            "startDate": $(this).data('start-date'),
+            "endDate": $(this).data('end-date'),
+            "minDate": $(this).data('min-date'),
+            "maxDate": $(this).data('max-date'),
+            locale: {
+                "format": "DD/MM/YYYY",
+                                },
+        }, (start, end, label)=>{
+            $(this).closest('.datepicker-input').find('[data-daterangepicker="from"]').val(start.format('YYYY-MM-DD'))
+            $(this).closest('.datepicker-input').find('[data-daterangepicker="to"]').val(end.format('YYYY-MM-DD'))
+        })
+    }else{
+        $(this).daterangepicker({
+            "parentEl": ($(this).closest('.full-screen-parent').length ? ".full-screen-parent" : "body"),
+            "startDate": $(this).data('start-date'),
+            "endDate": $(this).data('end-date'),
+            "minDate": $(this).data('min-date'),
+            "maxDate": $(this).data('max-date'),
+            "autoUpdateInput": false,
+            locale: {
+                "format": "DD/MM/YYYY",
+                                },
+        }, (start, end, label)=>{
+            $(this).closest('.datepicker-input').find('[data-daterangepicker="from"]').val(start.format('YYYY-MM-DD'))
+            $(this).closest('.datepicker-input').find('[data-daterangepicker="to"]').val(end.format('YYYY-MM-DD'))
+        })
+        $(this).on('apply.daterangepicker', function(ev, picker) {
+            $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'))
+            $(this).closest('.datepicker-input').find('[data-daterangepicker="from"]').val(picker.startDate.format('YYYY-MM-DD'))
+            $(this).closest('.datepicker-input').find('[data-daterangepicker="to"]').val(picker.endDate.format('YYYY-MM-DD'))
+        })
+        $(this).on('cancel.daterangepicker', function(ev, picker) {
+            $(this).val('')
+            picker.setStartDate({})
+            picker.setEndDate({})
+            $(this).closest('.datepicker-input').find('[data-daterangepicker="from"]').val('')
+            $(this).closest('.datepicker-input').find('[data-daterangepicker="to"]').val('')
+        })
+    }
+})
+
+$('[data-daterangepicker="clear"]').on('click', function(){
+    $('.daterangepicker .cancelBtn').trigger('click');
+})
+</script>
+
+
+
+
+
+
+
+<script type="text/javascript">
+$(document).ready(function () {
+
+    $('#zoomScaleIn, #zoomScaleOut').on('click',function() {
+        let scale = $(this).attr('data-scale');
+        console.log(scale);
+        $.ajaxSetup({
+            headers:
+            {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+        $.ajax({
+            url:"https://soclosedhaka.soclose.co/zoom/scale/change",
+            type : "post",
+            data:{scale:scale},
+            success:function (data) {
+                console.log(data);
+            }
+        });
+
+    });
+    $('#modules').on('keyup',function() {
+        var query = $(this).val();
+        $.ajax({
+
+            url:"https://soclosedhaka.soclose.co/search",
+
+            type:"GET",
+
+            data:{'modules':query},
+
+            success:function (data) {
+
+                $('#module_list').html(data);
+            }
+        })
+        // end of ajax call
+    });
+
+    function renderNotification(){
+        $.ajaxSetup({
+                headers:
+                {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+        $.ajax({
+            url: "https://soclosedhaka.soclose.co/notification-render",
+            type: "post",
+            success:function(res){
+                $('.unread_notification_count').html(res.count);
+                $('#all_notification_render').html(res.notifications);
+                $('#all_notification_footer').html(res.footer);
+            },
+
+        });
+    }
+
+    // setInterval(() => {
+    //     renderNotification()
+    // }, 3000);
+    /*$(document).on('click', 'li', function(){
+
+        var query = $(this).text();
+        $.ajax({
+
+           url:"https://soclosedhaka.soclose.co/searchUpdate/1",
+
+           type:"POST",
+
+           data:{'modules':query},
+
+           success:function (data) {
+
+               $('#module_list').html(data);
+           }
+       })
+    });*/
+    $('#subscriptionStopBtn').click(function(e){
+        e.preventDefault();
+        // if(confirm("Are You Sure To Stop Your Subscription")){
+            $('#stop_subscription_confirm').modal('show');
+        // }
+    })
+    $('#subscriptionCancelBtn').click(function(e){
+        e.preventDefault();
+        // if(confirm("Are You Sure To Stop Your Subscription")){
+            $('#cancel_subscription_confirm').modal('show');
+        // }
+    })
+});
+</script>
+
+
+<script>
+$(window).on('load', function() {
+    if (feather) {
+        feather.replace({
+            width: '1em',
+            height: '1em',
+        });
+    }
+})
+$(document).ready(function() {
+    $('.editor').summernote({
+        tabsize: 2,
+        height: 300
+    });
+});
+// var quill = new Quill('.editor', {
+//     modules: {
+//         toolbar: '#toolbar'
+//     },
+//     theme: 'snow'
+// });
+function alertNotification() {
+    $('.dropdown-notification').empty();
+    axios.get('/admin/chat/alert-notification')
+    .then(res => {
+        var response = res.data;
+        $('.dropdown-notification').append(response);
+        console.log(response);
+    })
+    .catch( e => console.log(e))
+}
+
+function allMessageRead() {
+    axios.get('/admin/chat/all-message-read')
+    .then(res => {
+        alertNotification();
+    })
+    .catch( e=> console.log(e))
+}
+
+function userMessageRead(from_id) {
+    axios.post('/admin/chat/user-message-read', {
+        from_id: from_id
+    })
+    .then(res => {
+        alertNotification();
+        window.location.href = "https://soclosedhaka.soclose.co/admin/chat/index";
+    })
+    .catch( e => console.log(e))
+}
+
+</script>
+
+<script>
+toastr.options = {
+    "closeButton": false,
+    "debug": false,
+    "newestOnTop": false,
+    "progressBar": true,
+    "positionClass": "toast-bottom-right",
+    "preventDuplicates": true,
+    "onclick": null,
+    "showDuration": "300",
+    "hideDuration": "1000",
+    "timeOut": "3000",
+    "extendedTimeOut": "1000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+}
+</script>
+
+<script>
+$(window).on("load", function(){
+
+
+        })
+</script>
+
+
+
+
+<script>
+// $('#dataTable').dataTable( {
+//     "pageLength": 5
+// });
+
+$('.dataTable').dataTable({
+    "bProcessing": false,
+    "sAutoWidth": false,
+    "bDestroy":false,
+    "bSort":false,
+    "sPaginationType": "bootstrap", // full_numbers
+    // "iDisplayStart ": 10,
+    // "iDisplayLength": 10,
+    "bPaginate": false, //hide/show pagination
+    "bFilter": true, //hide/show Search bar
+    "bInfo": false, // hide/show showing entries
+ })
+
+$('#dataTable').dataTable({
+    "bProcessing": false,
+    "sAutoWidth": false,
+    "bDestroy":false,
+    "bSort":true,
+    "sPaginationType": "bootstrap", // full_numbers
+    // "iDisplayStart ": 10,
+    // "iDisplayLength": 10,
+    "bPaginate": false, //hide/show pagination
+    "bFilter": true, //hide/show Search bar
+    "bInfo": false, // hide/show showing entries
+ })
+
+$('#data-table-without-short').dataTable({
+    "bProcessing": false,
+    "sAutoWidth": false,
+    "bDestroy":false,
+    "bSort":false,
+    "sPaginationType": "bootstrap", // full_numbers
+    // "iDisplayStart ": 10,
+    // "iDisplayLength": 10,
+    "bPaginate": false, //hide/show pagination
+    "bFilter": true, //hide/show Search bar
+    "bInfo": false, // hide/show showing entries
+ })
+
+$('.data-table-without-short').dataTable({
+    "bProcessing": false,
+    "sAutoWidth": false,
+    "bDestroy":false,
+    "bSort":false,
+    "sPaginationType": "bootstrap", // full_numbers
+    // "iDisplayStart ": 10,
+    // "iDisplayLength": 10,
+    "bPaginate": false, //hide/show pagination
+    "bFilter": true, //hide/show Search bar
+    "bInfo": false, // hide/show showing entries
+ })
+
+/* Sticky Header */
+$(window).on("scroll", function () {
+    var scrolling = $(this).scrollTop();
+
+    if (scrolling > $('.floating-nav').innerHeight()) {
+        $(".floating-nav").addClass("header--fixed");
+    } else {
+        $(".floating-nav").removeClass("header--fixed");
+    }
+});
+</script>
+
+
+<script>
+$(document).ready(function () {
+    $('.side_bar').click(function (e) {
+
+        $.ajaxSetup({
+                headers:
+                {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+        });
+
+        $.ajax({
+            url: "https://soclosedhaka.soclose.co/nav/sidebar",
+            type: "GET",
+
+        });
+
+    });
+});
+</script>
+
+
+
+
+<script>
+// Header Searchbar function
+$(document).ready(function () {
+
+    function debounceFunction(callback, delay = 400){
+        let timeOut
+        return (...args)=> {
+            clearTimeout(timeOut)
+            timeOut = setTimeout(() => {
+                callback(...args)
+            }, delay);
+        }
+    }
+
+    const ajaxMenuSearch = debounceFunction((searchedValue)=>{
+        $(".search-list-main").html('');
+        let search = searchedValue;
+
+        if(search.trim() == "") return;
+
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        $.ajax({
+            type: "post",
+            url: "https://soclosedhaka.soclose.co/search/modiul",
+            data: {
+                search: search,
+            },
+            success: function (response) {
+                $(".search-list-main").html(response.search);
+                $(".app-content").addClass("show-overlay");
+            },
+            error: function (response) {}
+        });
+    })
+
+    $('.header-navbar__search').on('input', function(){
+        ajaxMenuSearch($(this).val())
+    })
+
+
+    // $('.header-navbar__search').on('input', function (e) {
+    //     let search = $(this).val();
+
+    //     $.ajaxSetup({
+    //         headers: {
+    //             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+    //         }
+    //     });
+
+    //     $.ajax({
+    //         type: "post",
+    //         url: "https://soclosedhaka.soclose.co/search/modiul",
+    //         data: {
+    //             search: search,
+    //         },
+    //         success: function (response) {
+    //             console.log(response.search);
+
+    //             $(".search-list-main").html(response.search);
+
+    //             if(!$(this).val() == ""){
+    //                 $(".app-content").addClass("show-overlay");
+    //             }
+
+    //         },
+    //         error: function (response) {
+
+    //         }
+    //     });
+    // });
+
+});
+</script>
+
+<script>
+$(document).ready(function(){
+    /* Question Mark Button Show Hide Function */
+    $(".question-wrapper .question-btn").on("click", function(e){
+        $(this).toggleClass("question-btn--show");
+        e.stopPropagation();
+    });
+    $(document).on("click", function(e){
+        if(!$(e.target).hasClass('question-btn--show')){
+            $(".question-wrapper .question-btn").removeClass("question-btn--show");
+        }
+    });
+
+    $('[type="date"], [type="datetime-local"], [type="datetime"]').wrap('<div class="datepicker-input"></div>');
+
+    /* All Flatpickr Custom Inline Function */
+    document.querySelectorAll('input[type=date]').forEach(e => {
+        flatpickr(e, {
+            minDate: e.getAttribute('min'),
+            maxDate: e.getAttribute('max'),
+            defaultDate: e.getAttribute('value'),
+            altFormat: 'd-m-Y',
+            dateFormat: 'Y-m-d',
+            allowInput: true,
+            altInput: true,
+                            onReady: (selectedDates, dateStr, instance) => {
+                const mainInputDataId = instance.input.dataset.id;
+                const altInput = instance.input.parentElement?.querySelector(".input");
+                altInput.setAttribute("onkeypress", "return false");
+                altInput.setAttribute("onpaste", "return false");
+                altInput.setAttribute("autocomplete", "off");
+                altInput.setAttribute("id", mainInputDataId);
+            },
+        });
+    });
+
+    /* All Flatpickr Custom Inline datetime Function */
+    document.querySelectorAll('input[type=datetime]').forEach(e => {
+        flatpickr(e, {
+            minDate: e.getAttribute('min'),
+            maxDate: e.getAttribute('max'),
+            defaultDate: e.getAttribute('value'),
+            altFormat: 'd-m-Y H:i',
+            dateFormat: 'Y-m-d H:i',
+            allowInput: true,
+            altInput: true,
+            onReady: (selectedDates, dateStr, instance) => {
+                const mainInputDataId = instance.input.dataset.id;
+                const altInput = instance.input.parentElement?.querySelector(".input");
+                altInput.setAttribute("onkeypress", "return false");
+                altInput.setAttribute("onpaste", "return false");
+                altInput.setAttribute("autocomplete", "off");
+                altInput.setAttribute("id", mainInputDataId);
+            },
+        });
+    });
+
+    /* Simple Scrollbar function */
+    $(".simple-bar").each((index, element) => new SimpleBar(element, { autoHide: false }));
+
+    /*  Card Block Slider */
+    if($(".card-inner-slider").length > 0){
+        $(".card-inner-slider").slick({
+            slidesToShow: 1,
+            slidesToScroll: 1,
+            speed: 500,
+            arrows: true,
+            prevArrow: '<button class="slick__arrows slick__arrows--left border-0 d-inline-flex align-items-center justify-content-center position-absolute"><i class="fas fa-chevron-left"></i></button>',
+            nextArrow: '<button class="slick__arrows slick__arrows--right border-0 d-inline-flex align-items-center justify-content-center position-absolute"><i class="fas fa-chevron-right"></i></button>',
+            dots: false,
+            pauseOnHover: false,
+            pauseOnFocus: false,
+            infinite: false,
+        });
+    };
+
+    /*  Select2 width problem solve functions */
+    function select2Fix(){
+        $(".select2").select2({
+            width: '100%',
+        });
+        $("select.select2").css('width','100%');
+    }
+    select2Fix()
+
+    /*  Inner Table Dropdown probolem solve functions */
+    $('table').on('shown.bs.dropdown', function (e){
+        $(this).closest('[class*="col"]').addClass("position-static")
+    });
+    $('table').on('hide.bs.dropdown', function () {
+        $(this).closest('[class*="col"]').removeClass("position-static")
+    });
+
+    /* Aircall toggler Function */
+    $(".aircall-toggler").on("click", function(){
+        $(this).toggleClass("show");
+        $(this).siblings(".aircallFrame-container").toggleClass("show");
+    });
+
+    /* Stop Nav Link Ripple Animation Function */
+    $(".nav-item.ripple-animation-parent .nav-link").on("click", function(){
+        $(this).removeClass("ripple-animation");
+    });
+});
+</script>
+
+<script>
+/* Fullscreen Toggler Functions */
+function closeFullscreenMode() {
+    if (document.exitFullscreen) {
+        document.exitFullscreen()
+    }
+    else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen()
+    }
+    else if (document.msExitFullscreen) {
+        document.msExitFullscreen()
+    }
+    $(".full-screen-toggler--maximize").show()
+    $(".full-screen-toggler--minimize").hide()
+}
+
+$(".full-screen-toggler--maximize").on("click", function(){
+    const currentFullScreenParent = $(this).closest('.full-screen-parent').get(0)
+    $(currentFullScreenParent).find('select.select2').each(function(){
+        $(this).select2({
+            dropdownParent: $(currentFullScreenParent)
+        });
+    })
+
+    if (currentFullScreenParent.requestFullscreen) {
+        currentFullScreenParent.requestFullscreen()
+    } else if (currentFullScreenParent.webkitRequestFullscreen) { /* Safari */
+        currentFullScreenParent.webkitRequestFullscreen()
+    } else if (currentFullScreenParent.msRequestFullscreen) { /* IE11 */
+        currentFullScreenParent.msRequestFullscreen()
+    }
+
+    $(".full-screen-toggler--maximize").hide()
+    $(".full-screen-toggler--minimize").show()
+})
+
+$(".full-screen-toggler--minimize").on("click", function(){
+    closeFullscreenMode()
+})
+
+function exitFullscreenModeHandler(){
+    if (!document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement){
+        closeFullscreenMode()
+    }
+}
+
+if (document.addEventListener){
+    document.addEventListener('fullscreenchange', exitFullscreenModeHandler, false)
+    document.addEventListener('mozfullscreenchange', exitFullscreenModeHandler, false)
+    document.addEventListener('MSFullscreenChange', exitFullscreenModeHandler, false)
+    document.addEventListener('webkitfullscreenchange', exitFullscreenModeHandler, false)
+}
+</script>
+
+<script>
+$(document).ready(function (){
+    if($(".custom-editor-wrapper").length){
+        $(".custom-editor-wrapper").each(function (index, element) {
+            let quillEditor = new Quill(element.children[0], {
+                modules: {
+                    imageResize: {
+                        displaySize: true
+                    },
+                    toolbar: [
+                        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+                        ["bold", "italic", "underline", "strike"],
+                        ["blockquote", "code-block"],
+                        ["image", "video"],
+                        ["link"],
+                        [{ script: "sub" }, { script: "super" }],
+                        [{ list: "ordered" }, { list: "bullet" }],
+                        [{ color: [] }, { background: [] }],
+                        [{ align: [] }],
+                        ["clean"]
+                    ]
+                },
+                theme: "snow"
+            });
+            quillEditor.on("text-change", function (delta, source) {
+                $(element).find(".custom-editor-input").val(quillEditor.root.innerHTML);
+            });
+        });
+    }
+
+    $('[type="date"], [type="datetime-local"], [type="datetime"]').wrap('<div class="datepicker-input"></div>');
+})
+</script>
+
+<script>
+$(document).ready(function () {
+    $('[data-toggle="sidebar-modal"]').on('click', function(){
+        $($(this).attr('data-target')).addClass('show')
+    })
+
+    $('[data-sidebar-modal="close"]').on('click', function(){
+        $(this).closest('.sidebar-modal').removeClass('show')
+    })
+
+    $('[data-notification-searchbar]').on('input', function(){
+        let currentValue = $(this).val().toLowerCase()
+        $(".sidebar-modal__body .notification-item").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(currentValue) > -1)
+        })
+    })
+})
+</script>
+<!-- Footer Script End -->
+
+<script>
+  $(document).ready(function(){
+    // $(window).on( 'keyup', (e) => {
+    //   if (e.shiftKey && e.keyCode === 191) {
+    //     $('.header-navbar__search').focus();
+    //   }
+    // });
+    $('body').on('click', '.unboarding_button_yes', function(){
+      $('.unboarding_buttons').addClass('d-none');
+      $('.unboarding_form').removeClass('d-none');
+    });
+
+    $('body').on('click', '.unboarding_button_no', function(){
+      $('#unboardingModal').modal('hide');
+      $.ajaxSetup({
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      });
+
+      $.ajax({
+        type: "post",
+        url: "https://soclosedhaka.soclose.co/unboarding/cancel",
+        success: function (response) {
+            $('#unboardingModalLi').remove();
+          },
+          error: function (response) {
+
+          }
+      });
+
+
+    });
+
+    $('body').on('change', '#unboarding_meeting_date', function(){
+      let value = $(this).children('option:selected').data('id');
+      $.ajaxSetup({
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      });
+
+      $.ajax({
+        type: "post",
+        url: "https://soclosedhaka.soclose.co/unboarding-meeting-time",
+        data : {
+          value : value,
+        },
+        success: function (response) {
+          $('#unboarding_meeting_time').html(response);
+          },
+          error: function (response) {
+
+          }
+      });
+
+    });
+
+    $('body').on('click', '.meetingPerticipate', function(){
+      let value = $(this).attr('data-id');
+      var type = $(this).attr('data-type');
+      var thisAction = $(this);
+      // $('#unboardingModal').modal('hide');
+      // $('#unboardingModalLi').remove();
+      $.ajaxSetup({
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      });
+
+      $.ajax({
+        type: "post",
+        url: "https://soclosedhaka.soclose.co/unboarding-meeting-store",
+        data : {
+          value : value,
+          type  : type,
+        },
+        success: function (response) {
+          if(type == 'perticipate'){
+            $('#unboardingModal').modal('hide');
+            thisAction.text("Unsubscribe");
+            thisAction.attr('data-type', 'unsubscribe');
+            // if(!thisAction){
+            //   $('.availability-card__wrapper').fadeOut(1000, function(){
+            //       $(this).remove();
+            //   });
+            // }
+
+            thisAction.closest(".availability-card__wrapper").siblings(".availability-card__wrapper").remove();
+
+            toastr.success("Thanks for your response");
+          }else{
+            $('#UnboardingModalBody').html(response);
+            // toastr.success("Thanks for your response");
+          }
+          },
+          error: function (response) {
+
+          }
+      });
+
+    });
+
+    $('body').on('change', '#unboarding_meeting_duration', function(){
+      $('#unboarding_meeting_date').html('');
+      $('#unboarding_meeting_time').html('');
+      let value = $(this).val();
+      $.ajaxSetup({
+        headers: {
+          'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+      });
+      if(value != ''){
+        $.ajax({
+          type: "post",
+          url: "https://soclosedhaka.soclose.co/unboarding-meeting-date",
+          data : {
+            value : value,
+          },
+          success: function (response) {
+            $('#unboarding_meeting_date').html(response);
+            },
+            error: function (response) {
+
+            }
+        });
+      }
+
+    });
+
+    $("#clear").click(function(e){
+        $("#clear_demo_confirm").modal('show');
+    });
+
+    $("#sideBarUpgradeBtn").click(function(e){
+        $("#sideberUpgradePlanModal").modal('show');
+    });
+
+    $('#sideber_upgrade_from_btn').click(function(){
+      var data = $('#choosePlanSideber').val();
+      if(data != ''){
+          var array = data.split('-');
+          $('#sideber_plan_id').val(array[0]);
+          if(array[1] == 'yes'){
+            $('#sideber_price_pack').val('on');
+          }
+          $('#sideberUpgradePlanForm').submit();
+      }else{
+          toastr.error('Please Choose Your Plan first');
+        }
+    });
+
+    $('#pricing_package21').change(function(){
+          pricingPackageChange();
+    });
+
+    $('#choosePlan21').change(function(){
+        pricingPackageChange();
+    });
+  function pricingPackageChange(){
+        let package = $('#pricing_package21').val();
+        let plan = $('#choosePlan21').val();
+        let user = $('#number_of_user21').val();
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        $.ajax({
+            url: "https://soclosedhaka.soclose.co/pricing/package/upgrade",
+            type: 'POST',
+            data: {
+                plan_id    : plan,
+                package    : package,
+                user       : user,
+            },
+            success: function (data) {
+                $("#number_of_user21").html(data);
+                $('#custom_field_limit').text($('#choosePlan21').find(':selected').data('field_limit'));
+                $('#product_limit').text($('#choosePlan21').find(':selected').data('product-limit'));
+            }
+        });
+    }
+  });
+</script>
+
+
+
+<script>
+$(document).ready(function () {
+    $('[data-toggle="sidebar-modal"]').on('click', function(){
+        $($(this).attr('data-target')).addClass('show')
+        $('.sidebar-modal-backdrop').addClass('show')
+    })
+    $('[data-sidebar-modal="close"]').on('click', function(){
+        $(this).closest('.sidebar-modal').removeClass('show')
+        $('.sidebar-modal-backdrop').removeClass('show')
+    })
+    $('.sidebar-modal-backdrop').on('click', function(){
+        $(this).removeClass('show')
+        $('.sidebar-modal').removeClass('show')
+    })
+})
+</script>
+
+</body>

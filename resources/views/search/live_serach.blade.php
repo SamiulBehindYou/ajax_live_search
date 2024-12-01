@@ -42,31 +42,86 @@
                     </tbody>
                     <tbody id="searchData"></tbody>
                 </table>
-                {{ $products->links() }}
+                <div id="paginator">{{ $products->links() }}</div>
+                <div >
+                    <nav id="searchPaginator" class="d-none">
+                        <ul class="pagination">
+                          <li class="page-item" id="previousli">
+                            <a class="page-link" style="cursor: pointer;" id="previous" tabindex="-1">Previous</a>
+                          </li>
+                          <li class="page-item">
+                            <a class="page-link" style="cursor: pointer;" id="next">Next</a>
+                          </li>
+                        </ul>
+                      </nav>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
     <script>
+
+        let page = 1;
+        let value;
+
+        if(page == 1){
+            $('#previousli').attr('disabled', true);
+        }
+
+        // Search
         $('#search').on('keyup', function(){
-            $value = $(this).val();
-            if($value){
+            value = $(this).val();
+            if(value){
                 $('#alldata').hide();
+                $('#paginator').hide();
                 $('#searchData').show();
+                $('#searchPaginator').removeClass('d-none');
             }else{
                 $('#alldata').show();
+                $('#paginator').show();
                 $('#searchData').hide();
+                $('#searchPaginator').addClass('d-none');
             }
             $.ajax({
                 type:"GET",
                 url: '/searching',
-                data:{'search':$value},
+                data:{'search':value},
                 success:function(data){
                     $('#searchData').html(data);
                 },
             });
         });
+        // Search End
+
+        // Pagination
+        $('#previous').on('click', function(){
+            if(page > 0){
+                page = page - 1;
+                $.ajax({
+                    type:"GET",
+                    url: '/searching?page='+page,
+                    data:{'search':value},
+                    success:function(data){
+                        $('#searchData').html(data);
+                    },
+                });
+            }
+        });
+
+        $('#next').on('click', function(){
+            page = page + 1;
+            $.ajax({
+                type:"GET",
+                url: '/searching?page='+page,
+                data:{'search':value},
+                success:function(data){
+                    $('#searchData').html(data);
+                },
+            });
+        });
+
+        // Pagination End
 
     </script>
 </body>

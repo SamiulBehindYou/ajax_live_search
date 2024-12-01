@@ -13,17 +13,35 @@ class SearchController extends Controller
     }
 
     public function searching(Request $request){
-        $products = Product::where('name', 'like', '%'.$request->search.'%')->get();
-        $output = "";
-        foreach($products as $index=>$product){
-            $sl = $index+1;
-            $output.=   '<tr>
-                            <td>'.$sl.'</td>
-                            <td>'.$product->name.'</td>
-                            <td>'.$product->email.'</td>
-                            <td>'.$product->phone.'</td>
-                        </tr>';
+        $searchable = $request->search;
+        if($searchable){
+            $products = Product::where(function($query) use ($searchable){
+                $query->where('name', 'like', "$searchable%")
+                    ->orWhere('email', 'like', "$searchable%");
+            })->paginate(10);
+            $output = "";
+            $page = $request->get('page');
+            if($products->lastPage() >= $page){
+                foreach($products as $index=>$product){
+                    if($page){
+                        $sl = $index + ($page * 10) - 9;
+                    }else{
+                        $sl = $index + 1;
+                    }
+                    $output.=   '<tr>
+                                    <td>'.$sl.'</td>
+                                    <td>'.$product->name.'</td>
+                                    <td>'.$product->email.'</td>
+                                    <td>'.$product->phone.'</td>
+                                </tr>';
+                }
+            }else{
+                $output.=   "<tr>
+                                <td colspan='4'>No Data found!</td>
+                            </tr>";
+            }
+
+            return response($output);
         }
-        return response($output);
     }
 }
